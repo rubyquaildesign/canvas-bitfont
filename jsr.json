@@ -1,0 +1,7 @@
+{
+  "name":"@rubyquaildesign/canvas-bitfont",
+  "version":"1.0.0",
+  "exports": {
+    ".":"./src/Font.ts"
+  }
+}
