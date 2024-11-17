@@ -1,3 +1,7 @@
+
+![NPM Version](https://img.shields.io/npm/v/canvas-bitfont)
+[![JSR](https://jsr.io/badges/@rubyquaildesign/canvas-bitfont)](https://jsr.io/@rubyquaildesign/canvas-bitfont)
+[![JSR](https://jsr.io/badges/@rubyquaildesign/canvas-bitfont/score)](https://jsr.io/@rubyquaildesign/canvas-bitfont)
 # Canvas Bitfont
 
 Canvas bitfont is designed to draw bitmap fonts onto the canvas, it contains a simple (and probably bad) parser for [Rob Hagemans' `yaff` font format](https://github.com/robhagemans/monobit/blob/master/YAFF.md)
@@ -13,3 +17,4 @@ const myFont = await Font.load(myFontYaffSource);
 
 myCanvas2DContext.drawImage(myFont.fillText('Hello World', '#FFFFFF').canvas, x, y);
 ```
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V23WA1Z)
