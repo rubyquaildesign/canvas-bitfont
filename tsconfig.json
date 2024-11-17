@@ -20,7 +20,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts", "scripts/buildDocumentation.deno.js",
   ],
   "exclude": [
     "node_modules"

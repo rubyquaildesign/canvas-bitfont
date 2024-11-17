@@ -5,6 +5,6 @@
     ".": "./src/Font.ts"
   },
   "publish": {
-    "include": ["LICENSE", "README", "package.json", "src/**/*.ts", "src/parser.mjs"]
+    "include": ["LICENSE", "README.md", "package.json", "src/**/*.ts", "src/parser.mjs", "jsr.json"]
   }
 }

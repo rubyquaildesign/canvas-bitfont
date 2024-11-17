@@ -2,13 +2,31 @@ import { schema } from './schema';
 import { parse, SyntaxError } from './parser.mjs';
 import { ZodError } from 'zod';
 import { fromError } from 'zod-validation-error';
+/**
+ * @module
+ * This module contains the font class
+ * 
+ * @example
+ * ```ts
+ * const myFont = await Font.load(myFontYaffSource);
+ * 
+ * myCanvas2DContext.drawImage(myFont.fillText('Hello World', '#FFFFFF').canvas, x, y);
+ * ```
+ */
 
-type TextLineBoundingBox = {
+
+/** Returned data from a text size query */
+export type TextLineBoundingBox = {
   width: number;
   height: number;
-  vertOffset: number;
+  baseline: number;
 };
 
+/**
+ * A class to represent a single glyph in a font
+ *
+ * @class Glyph
+ */
 class Glyph {
   image: ImageBitmap;
   rasterWidth: number;
@@ -37,6 +55,16 @@ class Glyph {
     this.labels = glyphSource.labels;
     this.blank = isBlank;
   }
+
+  /**
+   * Compile's a glyph from raw font object
+   *
+   * @static
+   * @param glyphSource raw font object
+   * @param [globalShiftUp=0] a global shift value from the font definition
+   * @return {*} Returns a promise that resolves into the glyph
+   * @memberof Glyph
+   */
   public static async compile(glyphSource: any, globalShiftUp = 0): Promise<Glyph> {
     const bitmap = await window.createImageBitmap(
       typeof glyphSource.ink === 'string'
@@ -47,17 +75,43 @@ class Glyph {
   }
 }
 
+/**
+ * Main font class to generate and use yaff font
+ *
+ * @export
+ * @class Font
+ */
 export class Font {
+  /** Internal canvas */
   canvas: HTMLCanvasElement | OffscreenCanvas;
+
+  /** Internal canvas context */
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
-  #sourceData: any;
+
+  /** Source data from the schema */
+  sourceData: any;
+
+  /** Properties of the font from the source yaff file */
   properties: any;
+
+  /** An array of all the glyphs in the font */
   glyphs: Glyph[] = [];
+
+  /** global character spacing used to bluntly space all the characters apart
+   */
+  globalCharacterSpacing = 0;
+
+  /** Maps codePoints to glyphs */
   codePointMap: Map<number, Glyph> = new Map<number, Glyph>();
+  /** Maps unicode values to glyphs */
   unicodeMap: Map<number, Glyph> = new Map<number, Glyph>();
+  /** Maps characters to glyphs */
   characterMap: Map<string, Glyph> = new Map<string, Glyph>();
+  /** Maps yaff tags to glyphs */
   tagMap: Map<string, Glyph> = new Map<string, Glyph>();
+  /** Default glyph (if the font has one) */
   default?: Glyph;
+
   private constructor(yaffSource: string, canvas?: HTMLCanvasElement | OffscreenCanvas) {
     canvas = canvas ?? new OffscreenCanvas(100, 100);
     const ctx = canvas.getContext('2d') as
@@ -73,7 +127,7 @@ export class Font {
       const parsedSource = parse(yaffSource);
       console.log(parsedSource);
       const transformedData = schema.parse(parsedSource);
-      this.#sourceData = transformedData;
+      this.sourceData = transformedData;
     } catch (pError) {
       if (pError instanceof SyntaxError) {
         console.error(pError.format([{ text: yaffSource, source: 'input' }]));
@@ -85,9 +139,18 @@ export class Font {
       console.log(JSON.stringify(pError, null, 2));
       throw pError;
     }
-    this.properties = this.#sourceData.properties;
+    this.properties = this.sourceData.properties;
   }
 
+  /**
+   * Loads a yaff font from source
+   *
+   * @static
+   * @param yaffSource The source yaff string
+   * @param [canvas] An optional canvas to use internally, otherwise an offscreen canvas will be created
+   * @return {*} A promise that resolves into a font object
+   * @memberof Font
+   */
   public static async load(
     yaffSource: string,
     canvas?: HTMLCanvasElement | OffscreenCanvas
@@ -95,7 +158,7 @@ export class Font {
     const f = new Font(yaffSource, canvas);
     const globalShiftUp = f.properties.shiftUp ?? 0;
     f.glyphs = await Promise.all(
-      f.#sourceData.glyphs.map((g: any) => {
+      f.sourceData.glyphs.map((g: any) => {
         return Glyph.compile(g, globalShiftUp);
       })
     );
@@ -129,6 +192,13 @@ export class Font {
     return f;
   }
 
+  /**
+   * Get the glyph for a character (returns default glyph if none found and undefined if there is no default glyph)
+   *
+   * @param character the string character to find
+   * @return {*} Default glyph if none found and undefined if there is no default glyph
+   * @memberof Font
+   */
   getGlyphForCharacter(character: string): Glyph | undefined {
     let glyph = this.characterMap.get(character.charAt(0));
     if (glyph) return glyph;
@@ -143,6 +213,13 @@ export class Font {
     return undefined;
   }
 
+  /**
+   * Get the glyph for a character code (returns default glyph if none found and undefined if there is no default glyph)
+   *
+   * @param code the codepoint or character code to fetch
+   * @return {*} Default glyph if none found and undefined if there is no default glyph
+   * @memberof Font
+   */
   getGlyphForCharcode(code: number): Glyph | undefined {
     let glyph = this.codePointMap.get(code);
     if (glyph) return glyph;
@@ -152,11 +229,25 @@ export class Font {
     return undefined;
   }
 
+  /**
+   * Returns the {@link TextLineBoundingBox} for a line of text
+   *
+   * @param string the line of text to get the bounds of
+   * @return {*} TextLine Bounds
+   * @memberof Font
+   */
   boundingBoxForString(string: string): TextLineBoundingBox {
     const strArray = string.split('');
     return this.reduceString(strArray);
   }
 
+  /**
+   * Returns the {@link TextLineBoundingBox} for a line of character codes
+   *
+   * @param charArray the array of codes to get the bounds of
+   * @return {*} TextLine Bounds
+   * @memberof Font
+   */
   boundingBoxForCharCodeArray(charArray: number[]): TextLineBoundingBox {
     return this.reduceString(charArray);
   }
@@ -165,26 +256,34 @@ export class Font {
     let vertOffset: number = 0;
 
     const bounds = strArray.reduce<{ width: number; height: number }>(
-      (sum, cur) => {
+      (sum, cur, i) => {
         const glyph =
           typeof cur === 'string' ? this.getGlyphForCharacter(cur) : this.getGlyphForCharcode(cur);
         if (!glyph) return sum;
         vertOffset = Math.max(vertOffset, glyph.rasterHeight + glyph.shiftUp);
+
         return {
           ...sum,
-          width: sum.width + glyph.boundingWidth,
+          width: sum.width + (i !== 0 ? this.globalCharacterSpacing : 0) + glyph.boundingWidth,
           height: Math.max(sum.height, glyph.boundingHeight),
         };
       },
       { width: 0, height: 0 }
     );
-    return { ...bounds, vertOffset };
+    return { ...bounds, baseline: vertOffset };
   }
 
+  /**
+   * Setsup the internal canvas and draws the text in the fill colour for the particular line of text
+   * 
+   * @param text text string (or code point array) to draw
+   * @param fill fill style
+   * @returns a reference to the internal canvas and the baseline y value
+   */
   fillText(
     text: string | number[],
     fill: CanvasRenderingContext2D['fillStyle']
-  ): { canvas: Font['canvas']; verticalOffset: number } {
+  ): { canvas: Font['canvas']; baseline: number } {
     const bb =
       typeof text === 'string'
         ? this.boundingBoxForString(text)
@@ -195,20 +294,27 @@ export class Font {
     this.ctx.globalCompositeOperation = 'source-over';
     const array = typeof text === 'string' ? text.split('') : text;
     let x = 0;
-    for (const char of array) {
+    for (const [i, char] of array.entries()) {
+      const isFirst = i === 0;
       const glyph =
         typeof char === 'string' ? this.getGlyphForCharacter(char) : this.getGlyphForCharcode(char);
       if (!glyph) continue;
-      const y = bb.vertOffset - glyph.rasterHeight - glyph.shiftUp;
+      const y = bb.baseline - glyph.rasterHeight - glyph.shiftUp;
       console.log({ bb, glyph, char });
 
-      this.ctx.drawImage(glyph.image, x + glyph.leftBearing, y);
-      x += glyph.boundingWidth;
+      this.ctx.drawImage(
+        glyph.image,
+        x + (isFirst ? 0 : this.globalCharacterSpacing) + glyph.leftBearing,
+        y
+      );
+      x += (isFirst ? 0 : this.globalCharacterSpacing) + glyph.boundingWidth;
     }
     this.ctx.globalCompositeOperation = 'source-in';
     this.ctx.fillStyle = fill;
     this.ctx.fillRect(0, 0, bb.width, bb.height);
     this.ctx.globalCompositeOperation = 'source-over';
-    return { canvas: this.canvas, verticalOffset: bb.vertOffset };
+    return { canvas: this.canvas, baseline: bb.baseline };
   }
 }
+
+export default Font;
