@@ -7,6 +7,7 @@
   "files": ["./dist/*","./src/*.ts","./src/parser.mjs","./DOCS.md"],
   "browser": "dist/Font.js",
   "types": "dist/Font.d.ts",
+  "repository": "github:rubyquaildesign/canvas-bitfont",
   "exports": {
     ".": {
       "import": "./dist/Font.js",
@@ -15,7 +16,8 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "build-docs": "node scripts/buildDocumentation"
   },
   "keywords": [],
   "author": "",
