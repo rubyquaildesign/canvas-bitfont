@@ -125,7 +125,6 @@ export class Font {
     this.ctx = ctx;
     try {
       const parsedSource = parse(yaffSource);
-      console.log(parsedSource);
       const transformedData = schema.parse(parsedSource);
       this.sourceData = transformedData;
     } catch (pError) {
@@ -136,7 +135,6 @@ export class Font {
         const validationError = fromError(pError);
         throw validationError;
       }
-      console.log(JSON.stringify(pError, null, 2));
       throw pError;
     }
     this.properties = this.sourceData.properties;
@@ -300,7 +298,6 @@ export class Font {
         typeof char === 'string' ? this.getGlyphForCharacter(char) : this.getGlyphForCharcode(char);
       if (!glyph) continue;
       const y = bb.baseline - glyph.rasterHeight - glyph.shiftUp;
-      console.log({ bb, glyph, char });
 
       this.ctx.drawImage(
         glyph.image,
