@@ -1,4 +1,4 @@
-import { schema, definitions } from './schema.ts';
+import { schema, definitions } from './schema';
 import { parse, SyntaxError } from './parser.mjs';
 import { z, ZodError } from 'zod';
 import { fromError } from 'zod-validation-error';
