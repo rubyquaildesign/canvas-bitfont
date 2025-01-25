@@ -1,6 +1,6 @@
 {
   "name": "canvas-bitfont",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "description": "Canvas bitfont is designed to draw bitmap fonts onto the canvas, it contains a simple (and probably bad) parser for Rob Hagemans' yaff font format",
   "homepage": "https://github.com/rubyquaildesign/canvas-bitfont#readme",
   "bugs": "https://github.com/rubyquaildesign/canvas-bitfont/issues",
@@ -23,11 +23,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@std/text": "npm:@jsr/std__text@^1.0.8",
     "zod": "^3.23.8",
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@std/text": "npm:@jsr/std__text@^1.0.8",
     "@eslint/js": "^9.14.0",
     "@types/eslint__js": "^8.42.3",
     "eslint": "^9.14.0",
@@ -43,6 +43,7 @@
     "entry": [
       "src/Font.ts"
     ],
+    "noExternal":["@std/text"],
     "format": "esm",
     "sourcemap": true,
     "clean": true,

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import * as txt from '@std/text';
+import {toCamelCase} from '@std/text';
 const spacingOptions = z.enum(['character-cell', 'monospace', 'proportional', 'multi-cell']);
 const codePointValue = z.union([
   z
@@ -28,6 +28,9 @@ const fontUsableProperties = z
     encoding: z.string(),
     converter: z.string(),
     sourceFormat: z.string(),
+    cellSize: z.string(),
+    boundingBox: z.string(),
+    rasterSize: z.string(),
     sourceName: z.string(),
     shiftUp: z.number(),
     pointSize: z.number(),
@@ -43,7 +46,7 @@ const glyphUsableProperties = z
     shiftUp: z.number(),
     rightBearing: z.number(),
   })
-  .partial();
+  .partial().default({});
 const propertyParser = z
   .object({
     type: z.literal('property'),
@@ -54,9 +57,9 @@ const propertyParser = z
     val: z.string(),
   })
   .transform((inputObject) => {
-    const isNum = !/[^0-9.\- ]/.test(inputObject.val);
+    const isNum = !/[^0-9.-]/.test(inputObject.val);
     return [
-      txt.toCamelCase(inputObject.key),
+      toCamelCase(inputObject.key),
       isNum ? parseFloat(inputObject.val) : inputObject.val,
     ] as const;
   });

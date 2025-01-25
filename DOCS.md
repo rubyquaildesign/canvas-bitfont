@@ -2,7 +2,7 @@
 
 Main font class to generate and use yaff font
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L84)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L83)
 
 ### Methods
 
@@ -27,7 +27,7 @@ Parameters:
 * `canvas`: An optional canvas to use internally, otherwise an offscreen canvas will be created
 
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L154)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L177)
 
 #### :gear: getGlyphForCharacter
 
@@ -42,7 +42,7 @@ Parameters:
 * `character`: the string character to find
 
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L202)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L242)
 
 #### :gear: getGlyphForCharcode
 
@@ -57,7 +57,7 @@ Parameters:
 * `code`: the codepoint or character code to fetch
 
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L223)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L263)
 
 #### :gear: boundingBoxForString
 
@@ -72,7 +72,7 @@ Parameters:
 * `string`: the line of text to get the bounds of
 
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L239)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L279)
 
 #### :gear: boundingBoxForCharCodeArray
 
@@ -87,7 +87,7 @@ Parameters:
 * `charArray`: the array of codes to get the bounds of
 
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L251)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L291)
 
 #### :gear: fillText
 
@@ -103,7 +103,7 @@ Parameters:
 * `fill`: fill style
 
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L283)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L323)
 
 
 ## :cocktail: Types
@@ -118,5 +118,5 @@ Returned data from a text size query
 | ---------- | ---------- |
 | `TextLineBoundingBox` | `{ width: number; height: number; baseline: number; }` |
 
-[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L19)
+[:link: Source](https://github.com/rubyquaildesign/canvas-bitfont/tree/main/src/Font.ts#L18)
 

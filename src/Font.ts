@@ -1,19 +1,18 @@
-import { schema } from './schema';
+import { schema, definitions } from './schema.ts';
 import { parse, SyntaxError } from './parser.mjs';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 import { fromError } from 'zod-validation-error';
 /**
  * @module
  * This module contains the font class
- * 
+ *
  * @example
  * ```ts
  * const myFont = await Font.load(myFontYaffSource);
- * 
+ *
  * myCanvas2DContext.drawImage(myFont.fillText('Hello World', '#FFFFFF').canvas, x, y);
  * ```
  */
-
 
 /** Returned data from a text size query */
 export type TextLineBoundingBox = {
@@ -21,7 +20,7 @@ export type TextLineBoundingBox = {
   height: number;
   baseline: number;
 };
-
+const cellSizeRegex = /^(?:(\d+)\s+(\d+))$|^(?:(\d+)x(\d+))$/;
 /**
  * A class to represent a single glyph in a font
  *
@@ -66,7 +65,7 @@ class Glyph {
    * @memberof Glyph
    */
   public static async compile(glyphSource: any, globalShiftUp = 0): Promise<Glyph> {
-    const bitmap = await window.createImageBitmap(
+    const bitmap = await globalThis.createImageBitmap(
       typeof glyphSource.ink === 'string'
         ? new ImageData(1, 1)
         : new ImageData(glyphSource.ink.data, glyphSource.ink.width, glyphSource.ink.height)
@@ -92,7 +91,13 @@ export class Font {
   sourceData: any;
 
   /** Properties of the font from the source yaff file */
-  properties: any;
+  properties: z.infer<typeof definitions.fontProperties>;
+
+  /** A default cell size if there is one */
+  defaultCellSize?: { width: number; height: number };
+
+  /** Content of the raw lexer */
+  rawLexer: any;
 
   /** An array of all the glyphs in the font */
   glyphs: Glyph[] = [];
@@ -127,6 +132,7 @@ export class Font {
       const parsedSource = parse(yaffSource);
       const transformedData = schema.parse(parsedSource);
       this.sourceData = transformedData;
+      this.rawLexer = parsedSource;
     } catch (pError) {
       if (pError instanceof SyntaxError) {
         console.error(pError.format([{ text: yaffSource, source: 'input' }]));
@@ -138,6 +144,25 @@ export class Font {
       throw pError;
     }
     this.properties = this.sourceData.properties;
+    const sizeValues = [
+      this.properties.cellSize,
+      this.properties.boundingBox,
+      this.properties.rasterSize,
+    ]
+      .map((v) => {
+        if (v === undefined) return v;
+        const result = cellSizeRegex.exec(v);
+        if (result === null) return undefined;
+        const width = result[1] ?? result[3];
+        if (width === undefined) return undefined;
+        const height = result[2] ?? result[4];
+        if (height === undefined) return undefined;
+        const size = { width: parseFloat(width), height: parseFloat(height) };
+        if (!isFinite(size.width) || !isFinite(size.height)) return undefined;
+        return size;
+      })
+      .filter((v) => v !== undefined);
+    this.defaultCellSize = sizeValues.length ? sizeValues[0] : undefined;
   }
 
   /**
@@ -186,6 +211,23 @@ export class Font {
         const gly = f.getGlyphForCharacter(String.fromCharCode(f.properties.defaultChar));
         if (gly) f.default = gly;
       }
+    }
+    if (
+      !f.characterMap.has(' ') &&
+      !f.unicodeMap.has(' '.charCodeAt(0)) &&
+      !f.tagMap.has(' ') &&
+      f.defaultCellSize
+    ) {
+      const { width, height } = f.defaultCellSize;
+      const data = new Uint8ClampedArray(width * height * 4).fill(0);
+      const glyph = await Glyph.compile(
+        { ink: { width, height, data }, props: {}, labels: [{ type: 'character', label: "' '" }] },
+        globalShiftUp
+      );
+      f.glyphs.push(glyph);
+      f.characterMap.set(' ', glyph);
+      f.unicodeMap.set(32, glyph);
+      f.tagMap.set(' ', glyph);
     }
     return f;
   }
@@ -273,7 +315,7 @@ export class Font {
 
   /**
    * Setsup the internal canvas and draws the text in the fill colour for the particular line of text
-   * 
+   *
    * @param text text string (or code point array) to draw
    * @param fill fill style
    * @returns a reference to the internal canvas and the baseline y value

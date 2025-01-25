@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@std/text": "jsr:@std/text",
+    "zod": "npm:zod",
+    "zod-validation-error": "npm:zod-validation-error"
+  }
+}
