@@ -1,6 +1,6 @@
-import { schema, definitions } from './schema';
+import { schema } from './schema';
 import { parse, SyntaxError } from './parser.mjs';
-import { z, ZodError } from 'zod';
+import { ZodError } from 'zod';
 import { fromError } from 'zod-validation-error';
 /**
  * @module
@@ -91,7 +91,7 @@ export class Font {
   sourceData: any;
 
   /** Properties of the font from the source yaff file */
-  properties: z.infer<typeof definitions.fontProperties>;
+  properties: Record<string, string | number>;
 
   /** A default cell size if there is one */
   defaultCellSize?: { width: number; height: number };
@@ -179,7 +179,7 @@ export class Font {
     canvas?: HTMLCanvasElement | OffscreenCanvas
   ): Promise<Font> {
     const f = new Font(yaffSource, canvas);
-    const globalShiftUp = f.properties.shiftUp ?? 0;
+    const globalShiftUp: number = parseFloat((f.properties.shiftUp as any) ?? 0);
     f.glyphs = await Promise.all(
       f.sourceData.glyphs.map((g: any) => {
         return Glyph.compile(g, globalShiftUp);
