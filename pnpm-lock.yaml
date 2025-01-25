@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@std/text':
-        specifier: npm:@jsr/std__text@^1.0.8
-        version: '@jsr/std__text@1.0.8'
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -21,6 +18,9 @@ importers:
       '@eslint/js':
         specifier: ^9.14.0
         version: 9.14.0
+      '@std/text':
+        specifier: npm:@jsr/std__text@^1.0.8
+        version: '@jsr/std__text@1.0.8'
       '@types/eslint__js':
         specifier: ^8.42.3
         version: 8.42.3
